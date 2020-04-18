@@ -1,38 +1,56 @@
+# program for reading xml files,
+# getting information from them
+# and working with it
+
 import xml.dom.minidom as mn
 
 
 def get_info(tag, books):
-    # список элементов(могли бы быть еще узлы, в нашем случае их нет)
-    # дочерних узлов корневого узла 'Book'
+
+    """
+    function to get element values of a given child node
+
+    :param tag: name of child node
+    :param books: list of root nodes
+    :return: list of element values of given nodes
+    """
+    # list of child nodes
+    # (in our case they have no other nodes)
     tag_elements = []
 
-    # список значений элементов узлов 'Title'
+    # list of element values of child nodes
     nodes_values = []
 
-    # заполнение списка элементов, берем значения из дочернего узла с заданным названием из всех корневых узлов
+    # loop to populate a list of given name nodes
+    # in the root node find the child with the given name
     for book in books:
-        # получение элемента по тегу
-        element = book.getElementsByTagName(tag)[0]
+        element = book.getElementsByTagName(tag)[0]  # getting an item by tag
         tag_elements.append(element)
 
-    # извлечение значений элементов из дочерних узлов tag
+    # extract element values
     for element in tag_elements:
-        # значеник элемента
+        # node elements
         nodes = element.childNodes
         for node in nodes:
-            # список значений в этих узлах
+            # list of element values in these nodes
             nodes_values.append(node.data.replace('\n', ''))
 
     return nodes_values
 
 
 def get_id(books):
-    # список атрибутов, то есть ID каждой книги
+
+    """
+    function to get root list attributes
+
+    :param books: list of root nodes
+    :return: attribute list
+    """
+    # list of attribute values, i.e. each book ID
     attribute_values = []
 
-    # заполнение списка
     for book in books:
-        # получение атрибута каждого корневого узла
+        # getting attribute values of each root node
         attribute = book.getAttribute('id')
         attribute_values.append(attribute)
 
@@ -40,9 +58,20 @@ def get_id(books):
 
 
 def main(file):
-    #считывание файла, список корневых узлов 'Book', в которых хранятся другие узлы
+    """
+    main function for receiving,
+    processing information
+    and displaying the desired task
+
+    :param file: file name
+    :return:
+    """
+    # reading a file,
+    # creating a list of root nodes of the 'Book'
+    # in which other nodes are stored
     books = mn.parse(file).getElementsByTagName('Book')
 
+    # getting lists with all values of child gorges
     title_val = get_info('Title', books)
     publish_val = get_info('Publisher', books)
     eans_val = get_info('EAN', books)
@@ -54,9 +83,11 @@ def main(file):
     price_val = get_info('Price', books)
     id_val = get_id(books)
 
+    # two books have no authors, need to indicate this in the list
     ath_val.insert(title_val.index('Послушные вещи'), 'Неизвестно')
     ath_val.insert(title_val.index('Послушные вещи') + 1, 'Неизвестно')
 
+    # task selection menu
     print('Какую задачу нужно сделать?')
     print('Введите:', '\n', '1, если нужно узнать информацию по ID книги',
           '\n', '2, если нужно узнать информацию по ISBN книги',
@@ -64,6 +95,7 @@ def main(file):
           '\n', '4, если нужно посчитать среднюю стоимость книг по каждому издательству',
           '\n', '5, если нужно вывести информацию о самой дорогой книге по издательству и году издания',)
 
+    # receiving input data and validation
     answer = str(input())
     answers = ['1', '2', '3', '4', '5']
 
@@ -74,6 +106,8 @@ def main(file):
     answer = int(answer)
 
     if answer == 1:
+        # getting a dictionary with keys from ID
+        # and values from information lists
         dictionary_id = {}
         lst_turn = ['Title', 'Publisher', 'EAN', 'ISBN', 'Author',
                     'Printing copies', 'Year of publishing', 'Format', 'Price']
@@ -85,6 +119,7 @@ def main(file):
                                         yr_of_publish_val[i],
                                         format_val[i], price_val[i]]
 
+        # receiving input data and validation
         print('Введите ID книги')
         id = str(input())
         while id not in id_val:
@@ -95,6 +130,8 @@ def main(file):
             print(dictionary_id[id][i], '-', lst_turn[i])
 
     elif answer == 2:
+        # getting a dictionary with keys from ISBN
+        # and values from information lists
         dictionary_isbn = {}
         lst_turn = ['ID', 'Title', 'Publisher', 'EAN', 'Author',
                     'Printing copies', 'Year of publishing', 'Format', 'Price']
@@ -106,6 +143,7 @@ def main(file):
                                             yr_of_publish_val[i],
                                             format_val[i], price_val[i]]
 
+        # receiving input data and validation
         print('Введите ISBN книги')
         isbn = str(input())
         while isbn not in isbn_val:
@@ -116,6 +154,8 @@ def main(file):
             print(dictionary_isbn[isbn][i], '-', lst_turn[i])
 
     elif answer == 3:
+        # getting a dictionary with keys from the year of publication
+        # and values from the number of books
         dictionary_year = {}
         for i in range(len(yr_of_publish_val)):
             if dictionary_year.get(yr_of_publish_val[i], '0') == '0':
@@ -123,6 +163,7 @@ def main(file):
             else:
                 dictionary_year[yr_of_publish_val[i]] += 1
 
+        # receiving input data and validation
         print('Введите год издания книги')
         year = str(input())
         while year not in yr_of_publish_val:
@@ -133,6 +174,9 @@ def main(file):
               '- суммарное количество книг, изданных в этом году')
 
     elif answer == 4:
+        # getting a dictionary with keys from publishers
+        # and values from a list of two elements -
+        # the total price of books and the number of books
         dictionary_publish = {}
         for i in range(len(yr_of_publish_val)):
             if dictionary_publish.get(publish_val[i], '0') == '0':
@@ -151,6 +195,10 @@ def main(file):
                   sum_price // sum_count)
 
     else:
+        # getting a dictionary with keys from publishers
+        # and values from dictionaries with keys from years
+        # and values from lists of tuples with values -
+        # book ID and its value
         dictionary_publish_yr = {}
         for i in range(len(title_val)):
             yr = yr_of_publish_val[i]
@@ -163,8 +211,11 @@ def main(file):
 
             else:
                 dictionary_publish_yr[pb][yr].append((id_val[i], float(price_val[i])))
+                # sort descending book price
                 dictionary_publish_yr[pb][yr].sort(key=lambda i: -i[1])
 
+        # getting a dictionary with keys from ID
+        # and values from information lists
         dictionary_id = {}
         lst_turn = ['Title', 'Publisher', 'EAN', 'ISBN', 'Author',
                     'Printing copies', 'Year of publishing', 'Format', 'Price']
@@ -176,6 +227,7 @@ def main(file):
                                         yr_of_publish_val[i],
                                         format_val[i], price_val[i]]
 
+        # receiving input data and validation
         print('Введите издателя книги')
         publisher = str(input())
         while publisher not in publish_val:
@@ -188,6 +240,8 @@ def main(file):
             print('Введите верный год издания книги')
             year = str(input())
 
+        # comparison of prices of all books of the publisher,
+        # as they may have the same price
         all_expensive_books = [dictionary_publish_yr[publisher][year][0][0]]
         for i in range(1, len(dictionary_publish_yr[publisher][year])):
             if dictionary_publish_yr[publisher][year][i][1] == dictionary_publish_yr[publisher][year][0][1]:
@@ -196,5 +250,6 @@ def main(file):
         for i in all_expensive_books:
             for j in range(len(dictionary_id[i])):
                 print(dictionary_id[i][j], '-', lst_turn[j])
+
 
 main('books.xml')
